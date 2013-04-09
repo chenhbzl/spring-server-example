@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd 
+     http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd 
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd 
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd 
+     http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd
+     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+     http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.4.2.xsd">
+     
+     <!-- 声明注解方式加载bean ,注意加入上面的context schema声明-->
+    <context:annotation-config />
+    
+    <!-- 要加载的bean的包路径-->
+	<context:component-scan base-package="com.meituan.service.mobile" />
+     
+     
+     <!-- jsp文件路径的配置,因为我们开发的都是json 格式的api数据返回形式,这里一般用不到-->
+     <!-- 
+     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp" /> 
+     </bean>
+      --> 
+     
+     
+     <!-- 配置拦截器,拦截器的作用类似于filter -->
+    <bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="interceptors">
+			<list>
+				<ref bean="accessLoggerInterceptor" />
+			</list>
+		</property>
+	</bean>
+	
+	<!-- controller return数据的返回转换,很重要 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<!-- 使用jackson处理 -->
+				<bean
+					class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 未try catch的异常的处理 -->
+    <bean id="apiJsonExceptionConverter" class="com.meituan.service.mobile.example.exception.ApiJsonExceptionConverter">
+    </bean>
+    <bean id="exceptionResolver" class="com.meituan.service.mobile.example.exception.ExceptionResolver">
+        <property name="exceptionConverter" ref="apiJsonExceptionConverter"></property>
+    </bean>
+    
+    
+    <!-- 对multipart的支持,一般用于文件上传 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+     
+</beans>
